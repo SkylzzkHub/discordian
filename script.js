@@ -1,64 +1,117 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const messageInput = document.querySelector('.message-input input');
-  const sendButton = document.querySelector('.message-input button');
-  const messagesContainer = document.querySelector('.messages');
+// script.js
 
-  sendButton.addEventListener('click', sendMessage);
-  messageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
+const socket = io();
 
-  function sendMessage() {
-    const messageText = messageInput.value.trim();
-    if (messageText === '') return;
+// Elements
+const messagesContainer = document.getElementById('messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const usernameSubmit = document.getElementById('username-submit');
+const logoutButton = document.getElementById('logout');
+const channelList = document.getElementById('channel-list');
+const addChannelButton = document.getElementById('add-channel');
 
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message');
-
-    messageElement.innerHTML = `
-      <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
-      <div class="message-content">
-        <span class="username">You</span>
-        <span class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        <p>${escapeHTML(messageText)}</p>
-      </div>
-    `;
-
-    messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    messageInput.value = '';
+// Prompt for username
+usernameSubmit.addEventListener('click', () => {
+  const username = usernameInput.value.trim();
+  if (username) {
+    socket.emit('setUsername', username);
+    document.querySelector('.username').textContent = username;
+    document.querySelector('.avatar').textContent = username.charAt(0).toUpperCase();
+    usernameModal.style.display = 'none';
   }
+});
 
-  // Simple function to escape HTML to prevent XSS
-  function escapeHTML(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+// Send message
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendMessage();
   }
+});
 
-  // Handle adding new channels (optional)
-  const addChannelButton = document.querySelector('.add-channel');
-  const channelList = document.querySelector('.channel-list');
+function sendMessage() {
+  const msg = messageInput.value.trim();
+  if (msg === '') return;
+  socket.emit('chatMessage', msg);
+  messageInput.value = '';
+}
 
-  addChannelButton.addEventListener('click', () => {
-    const channelName = prompt('Enter new channel name:');
-    if (channelName) {
-      const newChannel = document.createElement('li');
-      newChannel.classList.add('channel');
-      newChannel.textContent = `# ${channelName}`;
-      channelList.appendChild(newChannel);
-    }
-  });
+// Receive messages
+socket.on('chatMessage', (data) => {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message');
 
-  // Handle server icon activation
-  const serverIcons = document.querySelectorAll('.server-icon');
-  serverIcons.forEach(icon => {
-    icon.addEventListener('click', () => {
-      serverIcons.forEach(icon => icon.classList.remove('active'));
-      icon.classList.add('active');
-      // You can add functionality to switch servers here
+  messageElement.innerHTML = `
+    <div class="avatar">${data.user.charAt(0).toUpperCase()}</div>
+    <div class="message-content">
+      <span class="username">${data.user}</span>
+      <span class="timestamp">${data.time}</span>
+      <p>${escapeHTML(data.message)}</p>
+    </div>
+  `;
+
+  messagesContainer.appendChild(messageElement);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// User joined
+socket.on('userJoined', (msg) => {
+  const systemMessage = document.createElement('div');
+  systemMessage.classList.add('message-system');
+  systemMessage.innerHTML = `<p>${msg}</p>`;
+  messagesContainer.appendChild(systemMessage);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// User left
+socket.on('userLeft', (msg) => {
+  const systemMessage = document.createElement('div');
+  systemMessage.classList.add('message-system');
+  systemMessage.innerHTML = `<p>${msg}</p>`;
+  messagesContainer.appendChild(systemMessage);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// Logout functionality
+logoutButton.addEventListener('click', () => {
+  window.location.reload();
+});
+
+// Add new channel
+addChannelButton.addEventListener('click', () => {
+  const channelName = prompt('Enter new channel name:');
+  if (channelName) {
+    const newChannel = document.createElement('li');
+    newChannel.classList.add('channel');
+    newChannel.textContent = `# ${channelName}`;
+    channelList.appendChild(newChannel);
+
+    // Optional: Add event listener for new channel
+    newChannel.addEventListener('click', () => {
+      document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
+      newChannel.classList.add('active');
+      // Implement channel switching logic here
+      // For simplicity, this example does not handle multiple channels
     });
+  }
+});
+
+// Handle channel switching
+document.querySelectorAll('.channel').forEach(channel => {
+  channel.addEventListener('click', () => {
+    document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
+    channel.classList.add('active');
+    // Implement channel switching logic here
+    // For simplicity, this example does not handle multiple channels
   });
 });
+
+// Simple function to escape HTML to prevent XSS
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
