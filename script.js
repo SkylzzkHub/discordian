@@ -89,12 +89,15 @@ addChannelButton.addEventListener('click', () => {
     newChannel.textContent = `# ${channelName}`;
     channelList.appendChild(newChannel);
 
-    // Optional: Add event listener for new channel
+    // Add event listener for new channel
     newChannel.addEventListener('click', () => {
       document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
       newChannel.classList.add('active');
       // Implement channel switching logic here
       // For simplicity, this example does not handle multiple channels
+      // To implement, you would need to manage channels on the server and client
+      // and filter messages based on the selected channel
+      messagesContainer.innerHTML = ''; // Clear messages when switching channels
     });
   }
 });
@@ -106,6 +109,9 @@ document.querySelectorAll('.channel').forEach(channel => {
     channel.classList.add('active');
     // Implement channel switching logic here
     // For simplicity, this example does not handle multiple channels
+    // To implement, you would need to manage channels on the server and client
+    // and filter messages based on the selected channel
+    messagesContainer.innerHTML = ''; // Clear messages when switching channels
   });
 });
 
