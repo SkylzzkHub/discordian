@@ -1,303 +1,69 @@
-/* styles.css */
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Clone</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="server-icons">
+        <div class="server-icon active" title="Server 1">S1</div>
+        <div class="server-icon" title="Server 2">S2</div>
+        <div class="server-icon" title="Server 3">S3</div>
+        <!-- Add more server icons as needed -->
+      </div>
+      <div class="channels">
+        <div class="channels-header">
+          <span>Channels</span>
+          <button id="add-channel" title="Add Channel">+</button>
+        </div>
+        <ul id="channel-list">
+          <li class="channel active"># general</li>
+          <li class="channel"># random</li>
+          <li class="channel"># support</li>
+          <!-- Add more channels as needed -->
+        </ul>
+      </div>
+      <div class="user-profile">
+        <div class="avatar">U</div>
+        <span class="username">Username</span>
+        <button id="logout" title="Logout">⨉</button>
+      </div>
+    </div>
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <h2># general</h2>
+        <!-- Additional header elements can be added here -->
+      </div>
+      <div id="messages" class="messages">
+        <!-- Messages will appear here -->
+      </div>
+      <div class="message-input">
+        <input type="text" id="message-input" placeholder="Type your message here...">
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+  </div>
 
-body, html {
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #36393f;
-  color: #dcddde;
-}
+  <!-- Modal for Username -->
+  <div id="username-modal" class="modal">
+    <div class="modal-content">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="username-input" placeholder="Username">
+      <button id="username-submit">Join Chat</button>
+    </div>
+  </div>
 
-.app {
-  display: flex;
-  height: 100vh;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 80px;
-  background-color: #2f3136;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 0;
-}
-
-.server-icons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.server-icon {
-  width: 50px;
-  height: 50px;
-  background-color: #202225;
-  border-radius: 25px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-.server-icon:hover, .server-icon.active {
-  background-color: #7289da;
-  transform: scale(1.1);
-}
-
-.channels {
-  flex-grow: 1;
-  color: #b9bbbe;
-}
-
-.channels-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: #72767d;
-}
-
-#add-channel {
-  background: none;
-  border: none;
-  color: #b9bbbe;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-#add-channel:hover {
-  color: #ffffff;
-}
-
-#channel-list {
-  list-style: none;
-  padding: 0 10px;
-}
-
-.channel {
-  padding: 8px 0;
-  cursor: pointer;
-  transition: color 0.2s, background-color 0.2s;
-  border-radius: 4px;
-}
-
-.channel:hover, .channel.active {
-  color: #ffffff;
-  background-color: #40444b;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  border-top: 1px solid #202225;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #7289da;
-  border-radius: 16px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.username {
-  flex-grow: 1;
-  font-size: 12px;
-}
-
-#logout {
-  background: none;
-  border: none;
-  color: #b9bbbe;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-#logout:hover {
-  color: #ffffff;
-}
-
-/* Chat Area */
-.chat-area {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: #36393f;
-}
-
-.chat-header {
-  padding: 10px;
-  background-color: #2f3136;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #202225;
-}
-
-.chat-header h2 {
-  font-size: 16px;
-}
-
-.messages {
-  flex-grow: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background-color: #36393f;
-}
-
-.message {
-  display: flex;
-  margin-bottom: 15px;
-}
-
-.message .avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #7289da;
-  border-radius: 16px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.message-content {
-  background-color: #40444b;
-  padding: 10px;
-  border-radius: 5px;
-  max-width: 60%;
-}
-
-.message-content .username {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-.message-content .timestamp {
-  font-size: 12px;
-  color: #72767d;
-}
-
-.message-content p {
-  margin-top: 5px;
-}
-
-.message-input {
-  padding: 10px;
-  background-color: #2f3136;
-  display: flex;
-  align-items: center;
-  border-top: 1px solid #202225;
-}
-
-#message-input {
-  flex-grow: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  background-color: #40444b;
-  color: #dcddde;
-  margin-right: 10px;
-  font-size: 14px;
-}
-
-#message-input::placeholder {
-  color: #72767d;
-}
-
-#send-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #7289da;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-#send-button:hover {
-  background-color: #5b6eae;
-}
-
-/* Modal Styling */
-.modal {
-  display: block; /* Hidden by default */
-  position: fixed;
-  z-index: 100;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.7);
-}
-
-.modal-content {
-  background-color: #2f3136;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #444;
-  width: 300px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.modal-content h2 {
-  margin-bottom: 20px;
-}
-
-#username-input {
-  width: 80%;
-  padding: 8px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 4px;
-}
-
-#username-submit {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #7289da;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-#username-submit:hover {
-  background-color: #5b6eae;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #2f3136;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #202225;
-  border-radius: 4px;
-}
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Client-side JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
