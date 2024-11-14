@@ -1,1 +1,65 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Clone</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="server-icons">
+        <div class="server-icon active">D</div>
+        <div class="server-icon">H</div>
+        <div class="server-icon">G</div>
+        <!-- Add more server icons as needed -->
+      </div>
+      <div class="channels">
+        <div class="channels-header">
+          <span>Text Channels</span>
+          <button class="add-channel">+</button>
+        </div>
+        <ul class="channel-list">
+          <li class="channel"># general</li>
+          <li class="channel"># random</li>
+          <li class="channel"># support</li>
+          <!-- Add more channels as needed -->
+        </ul>
+      </div>
+      <div class="user-profile">
+        <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+        <span class="username">Username#1234</span>
+        <button class="logout">Logout</button>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <h2># general</h2>
+        <!-- Add more header elements like search or settings if needed -->
+      </div>
+      <div class="messages">
+        <div class="message">
+          <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+          <div class="message-content">
+            <span class="username">User1</span>
+            <span class="timestamp">10:30 AM</span>
+            <p>Hello, everyone!</p>
+          </div>
+        </div>
+        <!-- Add more messages as needed -->
+      </div>
+      <div class="message-input">
+        <input type="text" placeholder="Message #general">
+        <button>Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
