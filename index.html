@@ -1,4 +1,4 @@
-
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,27 +12,27 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <div class="server-icons">
-        <div class="server-icon active">D</div>
-        <div class="server-icon">H</div>
-        <div class="server-icon">G</div>
+        <div class="server-icon active" title="Server 1">S1</div>
+        <div class="server-icon" title="Server 2">S2</div>
+        <div class="server-icon" title="Server 3">S3</div>
         <!-- Add more server icons as needed -->
       </div>
       <div class="channels">
         <div class="channels-header">
-          <span>Text Channels</span>
-          <button class="add-channel">+</button>
+          <span>Channels</span>
+          <button id="add-channel" title="Add Channel">+</button>
         </div>
-        <ul class="channel-list">
-          <li class="channel"># general</li>
+        <ul id="channel-list">
+          <li class="channel active"># general</li>
           <li class="channel"># random</li>
           <li class="channel"># support</li>
           <!-- Add more channels as needed -->
         </ul>
       </div>
       <div class="user-profile">
-        <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
-        <span class="username">Username#1234</span>
-        <button class="logout">Logout</button>
+        <div class="avatar">U</div>
+        <span class="username">Username</span>
+        <button id="logout" title="Logout">⨉</button>
       </div>
     </div>
 
@@ -40,26 +40,28 @@
     <div class="chat-area">
       <div class="chat-header">
         <h2># general</h2>
-        <!-- Add more header elements like search or settings if needed -->
+        <!-- Additional header elements can be added here -->
       </div>
-      <div class="messages">
-        <div class="message">
-          <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
-          <div class="message-content">
-            <span class="username">User1</span>
-            <span class="timestamp">10:30 AM</span>
-            <p>Hello, everyone!</p>
-          </div>
-        </div>
-        <!-- Add more messages as needed -->
+      <div id="messages" class="messages">
+        <!-- Messages will appear here -->
       </div>
       <div class="message-input">
-        <input type="text" placeholder="Message #general">
-        <button>Send</button>
+        <input type="text" id="message-input" placeholder="Type your message here...">
+        <button id="send-button">Send</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal for Username -->
+  <div id="username-modal" class="modal">
+    <div class="modal-content">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="username-input" placeholder="Username">
+      <button id="username-submit">Join Chat</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
