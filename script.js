@@ -1,75 +1,201 @@
-// server.js
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+// script.js
 
-// Initialize Express app
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const socket = io();
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+// Elements
+const messagesContainer = document.getElementById('messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const usernameSubmit = document.getElementById('username-submit');
+const authMessages = document.getElementById('auth-messages');
+const logoutButton = document.getElementById('logout');
+const channelList = document.getElementById('channel-list');
+const addChannelButton = document.getElementById('add-channel');
+const currentChannelHeader = document.getElementById('current-channel');
+const typingIndicator = document.getElementById('typing-indicator');
 
-// In-memory storage for messages and channels
-let messages = []; // Stores all messages
-let channels = ['general', 'random', 'support']; // Default channels
+let currentChannel = 'general';
+let typing = false;
+let timeout = undefined;
 
-// Handle socket connections
-io.on('connection', (socket) => {
-  console.log('New user connected:', socket.id);
+// Prompt for username
+usernameSubmit.addEventListener('click', () => {
+  const username = usernameInput.value.trim();
+  if (username) {
+    socket.emit('setUsername', username);
+    document.querySelector('.username').textContent = username;
+    document.querySelector('.avatar').textContent = username.charAt(0).toUpperCase();
+    usernameModal.style.display = 'none';
+  } else {
+    authMessages.textContent = 'Username cannot be empty.';
+  }
+});
 
-  // Send existing channels and messages to the newly connected client
-  socket.emit('initialize', { channels, messages });
+// Send message
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendMessage();
+  } else {
+    handleTyping();
+  }
+});
 
-  // Listen for setting username
-  socket.on('setUsername', (username) => {
-    socket.username = username;
-    io.emit('userJoined', `${socket.username} has joined the chat`);
+function sendMessage() {
+  const msg = messageInput.value.trim();
+  if (msg === '') return;
+  socket.emit('chatMessage', { message: msg, channel: currentChannel });
+  messageInput.value = '';
+  socket.emit('stopTyping', { channel: currentChannel });
+  typing = false;
+}
+
+function handleTyping() {
+  if (!typing) {
+    typing = true;
+    socket.emit('typing', { channel: currentChannel });
+    timeout = setTimeout(stopTyping, 3000);
+  } else {
+    clearTimeout(timeout);
+    timeout = setTimeout(stopTyping, 3000);
+  }
+}
+
+function stopTyping() {
+  typing = false;
+  socket.emit('stopTyping', { channel: currentChannel });
+}
+
+// Receive initial data
+socket.on('initialize', (data) => {
+  // Populate channels
+  channelList.innerHTML = '';
+  data.channels.forEach((channel) => {
+    addChannelToList(channel);
   });
 
-  // Listen for chat messages
-  socket.on('chatMessage', (data) => {
-    if (socket.username && data.channel) {
-      const messageData = {
-        user: socket.username,
-        message: data.message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        channel: data.channel,
-      };
-      messages.push(messageData); // Save message
-      io.emit('chatMessage', messageData); // Broadcast message
+  // Populate messages
+  data.messages.forEach((msg) => {
+    if (msg.channel === currentChannel) {
+      displayMessage(msg);
     }
-  });
-
-  // Listen for adding new channels
-  socket.on('addChannel', (channelName) => {
-    if (channelName && !channels.includes(channelName)) {
-      channels.push(channelName);
-      io.emit('channelList', channels); // Update all clients
-    }
-  });
-
-  // Listen for typing indicators
-  socket.on('typing', (data) => {
-    socket.broadcast.emit('typing', { username: socket.username, channel: data.channel });
-  });
-
-  socket.on('stopTyping', (data) => {
-    socket.broadcast.emit('stopTyping', { username: socket.username, channel: data.channel });
-  });
-
-  // Handle disconnections
-  socket.on('disconnect', () => {
-    if (socket.username) {
-      io.emit('userLeft', `${socket.username} has left the chat`);
-    }
-    console.log('User disconnected:', socket.id);
   });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Receive messages
+socket.on('chatMessage', (data) => {
+  if (data.channel === currentChannel) {
+    displayMessage(data);
+  }
 });
+
+// User joined
+socket.on('userJoined', (msg) => {
+  const systemMessage = document.createElement('div');
+  systemMessage.classList.add('message-system');
+  systemMessage.innerHTML = `<p>${msg}</p>`;
+  messagesContainer.appendChild(systemMessage);
+  scrollToBottom();
+});
+
+// User left
+socket.on('userLeft', (msg) => {
+  const systemMessage = document.createElement('div');
+  systemMessage.classList.add('message-system');
+  systemMessage.innerHTML = `<p>${msg}</p>`;
+  messagesContainer.appendChild(systemMessage);
+  scrollToBottom();
+});
+
+// Update channels list
+socket.on('channelList', (channels) => {
+  channelList.innerHTML = '';
+  channels.forEach((channel) => {
+    addChannelToList(channel);
+  });
+});
+
+// Receive typing indicators
+socket.on('typing', (data) => {
+  if (data.channel === currentChannel) {
+    typingIndicator.textContent = `${data.username} is typing...`;
+  }
+});
+
+socket.on('stopTyping', (data) => {
+  if (data.channel === currentChannel) {
+    typingIndicator.textContent = '';
+  }
+});
+
+// Logout functionality
+logoutButton.addEventListener('click', () => {
+  window.location.reload();
+});
+
+// Add new channel
+addChannelButton.addEventListener('click', () => {
+  const channelName = prompt('Enter new channel name:');
+  if (channelName && channelName.trim() !== '') {
+    socket.emit('addChannel', channelName.trim());
+  }
+});
+
+// Handle channel switching
+function addChannelToList(channelName) {
+  const channelElement = document.createElement('li');
+  channelElement.classList.add('channel');
+  channelElement.textContent = `# ${channelName}`;
+  if (channelName === currentChannel) {
+    channelElement.classList.add('active');
+  }
+  channelList.appendChild(channelElement);
+
+  channelElement.addEventListener('click', () => {
+    if (currentChannel !== channelName) {
+      // Remove active class from all channels
+      document.querySelectorAll('.channel').forEach((ch) => ch.classList.remove('active'));
+      // Add active class to selected channel
+      channelElement.classList.add('active');
+      // Update current channel
+      currentChannel = channelName;
+      currentChannelHeader.textContent = `# ${currentChannel}`;
+      // Clear messages
+      messagesContainer.innerHTML = '';
+      // Emit a request to re-initialize messages for the new channel
+      socket.emit('initialize');
+    }
+  });
+}
+
+// Display message
+function displayMessage(data) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message');
+
+  messageElement.innerHTML = `
+    <div class="avatar">${data.user.charAt(0).toUpperCase()}</div>
+    <div class="message-content">
+      <span class="username">${data.user}</span>
+      <span class="timestamp">${data.time}</span>
+      <p>${escapeHTML(data.message)}</p>
+    </div>
+  `;
+
+  messagesContainer.appendChild(messageElement);
+  scrollToBottom();
+}
+
+// Scroll to bottom
+function scrollToBottom() {
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Simple function to escape HTML to prevent XSS
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
