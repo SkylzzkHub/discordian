@@ -1,75 +1,67 @@
-// server.js
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Clone</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="server-icons">
+        <div class="server-icon active" title="Server 1">S1</div>
+        <div class="server-icon" title="Server 2">S2</div>
+        <div class="server-icon" title="Server 3">S3</div>
+        <!-- Add more server icons as needed -->
+      </div>
+      <div class="channels">
+        <div class="channels-header">
+          <span>Channels</span>
+          <button id="add-channel" title="Add Channel">+</button>
+        </div>
+        <ul id="channel-list">
+          <!-- Channels will be dynamically added here -->
+        </ul>
+      </div>
+      <div class="user-profile">
+        <div class="avatar">U</div>
+        <span class="username">Username</span>
+        <button id="logout" title="Logout">⨉</button>
+      </div>
+    </div>
 
-// Initialize Express app
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <h2 id="current-channel"># general</h2>
+      </div>
+      <div id="messages" class="messages">
+        <!-- Messages will appear here -->
+      </div>
+      <div class="message-input">
+        <input type="text" id="message-input" placeholder="Type your message here...">
+        <button id="send-button">Send</button>
+      </div>
+      <div class="typing-indicator" id="typing-indicator"></div>
+    </div>
+  </div>
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+  <!-- Modal for Username -->
+  <div id="username-modal" class="modal">
+    <div class="modal-content">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="username-input" placeholder="Username">
+      <button id="username-submit">Join Chat</button>
+      <div id="auth-messages" class="auth-messages"></div>
+    </div>
+  </div>
 
-// In-memory storage for messages and channels
-let messages = []; // Stores all messages
-let channels = ['general', 'random', 'support']; // Default channels
-
-// Handle socket connections
-io.on('connection', (socket) => {
-  console.log('New user connected:', socket.id);
-
-  // Send existing channels and messages to the newly connected client
-  socket.emit('initialize', { channels, messages });
-
-  // Listen for setting username
-  socket.on('setUsername', (username) => {
-    socket.username = username;
-    io.emit('userJoined', `${socket.username} has joined the chat`);
-  });
-
-  // Listen for chat messages
-  socket.on('chatMessage', (data) => {
-    if (socket.username && data.channel) {
-      const messageData = {
-        user: socket.username,
-        message: data.message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        channel: data.channel,
-      };
-      messages.push(messageData); // Save message
-      io.emit('chatMessage', messageData); // Broadcast message
-    }
-  });
-
-  // Listen for adding new channels
-  socket.on('addChannel', (channelName) => {
-    if (channelName && !channels.includes(channelName)) {
-      channels.push(channelName);
-      io.emit('channelList', channels); // Update all clients
-    }
-  });
-
-  // Listen for typing indicators
-  socket.on('typing', (data) => {
-    socket.broadcast.emit('typing', { username: socket.username, channel: data.channel });
-  });
-
-  socket.on('stopTyping', (data) => {
-    socket.broadcast.emit('stopTyping', { username: socket.username, channel: data.channel });
-  });
-
-  // Handle disconnections
-  socket.on('disconnect', () => {
-    if (socket.username) {
-      io.emit('userLeft', `${socket.username} has left the chat`);
-    }
-    console.log('User disconnected:', socket.id);
-  });
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Client-side JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
