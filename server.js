@@ -24,12 +24,14 @@ io.on('connection', (socket) => {
 
   // Listen for chat messages
   socket.on('chatMessage', (msg) => {
-    const messageData = {
-      user: socket.username,
-      message: msg,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-    io.emit('chatMessage', messageData);
+    if (socket.username) {
+      const messageData = {
+        user: socket.username,
+        message: msg,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      io.emit('chatMessage', messageData);
+    }
   });
 
   // Handle disconnections
